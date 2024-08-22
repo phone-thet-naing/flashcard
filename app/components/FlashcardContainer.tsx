@@ -17,6 +17,7 @@ const FlashcardContainer = () => {
   const [body, setBody] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState("");
+  const [displayFlashcards, setDisplayFlashcards] = useState(false);
 
   const storeData = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -53,11 +54,19 @@ const FlashcardContainer = () => {
       console.log(JSON.parse(cards));
       setFlashcards(JSON.parse(cards));
       setIsLoading(false);
+      setDisplayFlashcards(true);
     } else {
       setMessage("No cards found");
       setIsLoading(false);
     }
   }, []);
+
+  useEffect(() => {
+    if (flashcards.length > 0) {
+      setDisplayFlashcards(true)
+      setMessage("");
+    }
+  }, [flashcards])
 
   return (
     <>
@@ -71,7 +80,7 @@ const FlashcardContainer = () => {
         message={message}
       />
 
-      {!isLoading && !message && (
+      {displayFlashcards && (
         <div className="flex items-center justify-center  w-5/6 overflow-hidden flex-wrap">
           {flashcards.map((card, idx) => (
             <span key={idx}>
