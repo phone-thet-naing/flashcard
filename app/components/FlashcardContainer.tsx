@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { Fragment, useCallback } from "react";
 import { useState, useEffect } from "react";
 import Flashcard from "./Flashcard";
 import FlashcardForm from "./FlashcardForm";
@@ -13,79 +13,68 @@ interface Flashcard {
 
 const FlashcardContainer = () => {
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
-  const [title, setTitle] = useState<string>("");
-  const [body, setBody] = useState<string>("");
+  const [formState, setFormState] = useState({ title: "", body: "" });
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState("");
-  const [displayFlashcards, setDisplayFlashcards] = useState(false);
 
-  const storeData = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const storeData = useCallback(
+    (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      const { title, body } = formState;
 
-    if (title.trim() !== "" && body.trim() !== "") {
-      const form = e.target as HTMLFormElement;
-      let cards = [];
+      if (title.trimEnd() && body.trim()) {
+        const newCard = { title, body };
+        const updatedFlashcards = [...flashcards, newCard];
 
-      const title = form.elements.namedItem("title") as HTMLInputElement;
-      const body = form.elements.namedItem("body") as HTMLInputElement;
+        setFlashcards(updatedFlashcards);
+        // Store flashcards in local storage
+        localStorage.setItem("cards", JSON.stringify(updatedFlashcards));
 
-      const cardObject = { title: title.value, body: body.value };
-      setFlashcards([...flashcards, cardObject]);
-      console.log(flashcards);
-      cards = [...flashcards, cardObject];
-      const jsonedCards = JSON.stringify(cards);
-
-      console.log("Normal cards: " + cards);
-      console.log("JSON object: " + jsonedCards);
-
-      // Store cards in local storage (later use a db)
-      localStorage.setItem("cards", jsonedCards);
-
-      setTitle("");
-      setBody("");
-    }
-  };
+        // Clean formState
+        setFormState({ title: "", body: "" });
+      }
+    },
+    [formState, flashcards]
+  );
 
   useEffect(() => {
     // Get cards stored in local storage
-    const cards = localStorage.getItem("cards");
+    const storedCards = localStorage.getItem("cards");
 
-    if (cards) {
-      console.log(JSON.parse(cards));
-      setFlashcards(JSON.parse(cards));
-      setIsLoading(false);
-      setDisplayFlashcards(true);
+    if (storedCards) {
+      setFlashcards(JSON.parse(storedCards));
     } else {
       setMessage("No cards found");
-      setIsLoading(false);
     }
+    setIsLoading(false);
   }, []);
 
   useEffect(() => {
     if (flashcards.length > 0) {
-      setDisplayFlashcards(true)
       setMessage("");
     }
-  }, [flashcards])
+  }, [flashcards]);
 
   return (
     <>
       <FlashcardForm
-        title={title}
-        body={body}
-        setTitle={setTitle}
-        setBody={setBody}
+        title={formState.title}
+        body={formState.body}
+        setTitle={(value) =>
+          setFormState((prev) => ({ ...prev, title: value }))
+        }
+        setBody={(value) => setFormState((prev) => ({ ...prev, body: value }))}
         storeData={storeData}
         isLoading={isLoading}
         message={message}
       />
 
-      {displayFlashcards && (
-        <div className="flex items-center justify-center  w-5/6 overflow-hidden flex-wrap">
+      {!isLoading && !message && flashcards.length > 0 && (
+        <div className="flex items-center justify-center w-5/6 overflow-hidden flex-wrap">
           {flashcards.map((card, idx) => (
-            <span key={idx}>
+            <Fragment key={idx}>
               <Flashcard title={card.title} body={card.body} />
-            </span>
+            </Fragment>
           ))}
 
           {/* <Popup /> */}
