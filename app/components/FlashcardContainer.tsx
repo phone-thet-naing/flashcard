@@ -70,7 +70,7 @@ const FlashcardContainer = () => {
       />
 
       {!isLoading && !message && flashcards.length > 0 && (
-        <div className="flex items-center justify-center w-5/6 overflow-hidden flex-wrap">
+        <div className="flex items-center justify-center gap-4 w-5/6 overflow-hidden flex-wrap">
           {flashcards.map((card, idx) => (
             <Fragment key={idx}>
               <Flashcard title={card.title} body={card.body} />

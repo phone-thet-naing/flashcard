@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import { relative } from "path";
+import React, { Fragment, useState } from "react";
 
 type Face = "front" | "back";
 
 const Flashcard = ({ title, body }: { title: string; body: string }) => {
   const [isFlipped, setIsFlipped] = useState<boolean>(false);
+  const [showMenu, setShowMenu] = useState(false);
 
   const handleFlip = () => {
     setIsFlipped(!isFlipped);
@@ -11,12 +13,21 @@ const Flashcard = ({ title, body }: { title: string; body: string }) => {
 
   return (
     <>
-      <div className={`card-container`} onClick={handleFlip}>
-        <div className={`card ${!isFlipped ? "flipped" : ""}`}>
-          <div
-            // className={"bg-slate-200 text-black absolute w-full h-full"}
-            className="card-front"
-          >
+      <div className={`card-container`}>
+        <span onClick={() => setShowMenu(!showMenu)}>...</span>
+        <div className={`flex flex-col ${showMenu ? "" : "hidden"}`}>
+          <button className="text-sm text-left hover:bg-slate-700 hover:text-white">
+            Delete
+          </button>
+          <button className="text-sm text-left hover:bg-slate-700 hover:text-white">
+            Cancel
+          </button>
+        </div>
+        <div
+          className={`card ${!isFlipped ? "flipped" : ""}`}
+          onClick={handleFlip}
+        >
+          <div className="card-front">
             <h1 className="font-bold">{title}</h1>
             <p className="text-sm">{body}</p>
           </div>
