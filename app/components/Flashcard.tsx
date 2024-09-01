@@ -1,11 +1,21 @@
-import { relative } from "path";
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useRef, useState } from "react";
 
 type Face = "front" | "back";
 
-const Flashcard = ({ title, body }: { title: string; body: string }) => {
+const Flashcard = ({
+  id,
+  title,
+  body,
+  deleteCard,
+}: {
+  id: number;
+  title: string;
+  body: string;
+  deleteCard: (id: number) => void;
+}) => {
   const [isFlipped, setIsFlipped] = useState<boolean>(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [hoverState, setHoverState] = useState(false);
 
   const handleFlip = () => {
     setIsFlipped(!isFlipped);
@@ -13,13 +23,19 @@ const Flashcard = ({ title, body }: { title: string; body: string }) => {
 
   return (
     <>
-      <div className={`card-container`}>
-        <span onClick={() => setShowMenu(!showMenu)}>...</span>
+      <div className={`card-container`} onMouseOver={() => setHoverState(true)}>
+        <span className="" onClick={() => setShowMenu(!showMenu)}>...</span>
         <div className={`flex flex-col ${showMenu ? "" : "hidden"}`}>
-          <button className="text-sm text-left hover:bg-slate-700 hover:text-white">
+          <button
+            onClick={() => deleteCard(id)}
+            className="text-sm text-left hover:bg-slate-700 hover:text-white"
+          >
             Delete
           </button>
-          <button className="text-sm text-left hover:bg-slate-700 hover:text-white">
+          <button
+            onClick={() => setShowMenu(!showMenu)}
+            className="text-sm text-left hover:bg-slate-700 hover:text-white"
+          >
             Cancel
           </button>
         </div>

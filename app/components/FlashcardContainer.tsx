@@ -4,7 +4,6 @@ import React, { Fragment, useCallback } from "react";
 import { useState, useEffect } from "react";
 import Flashcard from "./Flashcard";
 import FlashcardForm from "./FlashcardForm";
-import Popup from "./Popup";
 
 interface Flashcard {
   title: string;
@@ -37,6 +36,12 @@ const FlashcardContainer = () => {
     [formState, flashcards]
   );
 
+  const handleDelete = (id: number) => {
+    const remainingCards = flashcards.filter((_, index) => index !== id);
+    setFlashcards(remainingCards);
+    localStorage.setItem("cards", JSON.stringify(remainingCards));
+  };
+
   useEffect(() => {
     // Get cards stored in local storage
     const storedCards = localStorage.getItem("cards");
@@ -52,14 +57,16 @@ const FlashcardContainer = () => {
   useEffect(() => {
     if (flashcards.length > 0) {
       setMessage("");
+    } else {
+      setMessage("No cards found");
     }
   }, [flashcards]);
 
   return (
     <>
+      {/* Form to create flashcard */}
       <FlashcardForm
-        title={formState.title}
-        body={formState.body}
+        formState={formState}
         setTitle={(value) =>
           setFormState((prev) => ({ ...prev, title: value }))
         }
@@ -69,18 +76,34 @@ const FlashcardContainer = () => {
         message={message}
       />
 
+      {/* Flashcard list */}
       {!isLoading && !message && flashcards.length > 0 && (
-        <div className="flex items-center justify-center gap-4 w-5/6 overflow-hidden flex-wrap">
-          {flashcards.map((card, idx) => (
-            <Fragment key={idx}>
-              <Flashcard title={card.title} body={card.body} />
-            </Fragment>
-          ))}
-
-          {/* <Popup /> */}
-        </div>
+        <FlashcardList flashcards={flashcards} handleDelete={handleDelete} />
       )}
     </>
+  );
+};
+
+const FlashcardList = ({
+  flashcards,
+  handleDelete,
+}: {
+  flashcards: Flashcard[];
+  handleDelete: (id: number) => void;
+}) => {
+  return (
+    <div className="flex items-center justify-center gap-4 w-5/6 overflow-hidden flex-wrap">
+      {flashcards.map(({ title, body }, idx) => (
+        <Fragment key={idx}>
+          <Flashcard
+            title={title}
+            body={body}
+            id={idx}
+            deleteCard={handleDelete}
+          />
+        </Fragment>
+      ))}
+    </div>
   );
 };
 
